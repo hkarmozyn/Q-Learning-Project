@@ -1,3 +1,6 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -88,6 +91,20 @@ public class MazeSolver {
 
                 crtState = nextState;
             }
+        }
+    }
+    public void printQ() {
+        try (PrintWriter pw = new PrintWriter(new FileWriter("resources/output.txt"))) {
+            pw.println("Q matrix");
+            for (int i = 0; i < Q.length; i++) {
+                pw.print("From state " + i + ":  ");
+                for (int j = 0; j < Q[i].length; j++) {
+                    pw.println("%6.2f " + Q[i][j]);
+                }
+                pw.println();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
