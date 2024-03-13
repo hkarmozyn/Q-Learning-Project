@@ -94,7 +94,7 @@ public class MazeSolver {
         }
     }
     public void printQ() {
-        try (PrintWriter pw = new PrintWriter(new FileWriter("resources/output.txt"))) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter("output.txt"))) {
             pw.println("Q matrix");
             for (int i = 0; i < Q.length; i++) {
                 pw.print("From state " + i + ":  ");
@@ -148,5 +148,73 @@ public class MazeSolver {
         }
         return policyGotoState;
     }
+    public void run(){
+        int i =0;
+        int h=0;
+        for(int k=0; k<m.getStatesCount();k++){
+            i=k/m.getWidth();
+            h=k-i*m.getStatesCount();
+            for (int s=0; s< m.getStatesCount();s++){
+                R[k][s]= -1;
+            }
 
-}
+            if ((maze[i][h])!='F'){
+                int goLeft= h -1;
+                if (goLeft>=0){
+                    int target = i * m.getWidth() + goLeft;
+                    if (maze[i][goLeft]=='0'){
+                        R[k][target]=0;
+                    } else if (maze[i][goLeft] == 'F') {
+                        R[k][target] = reward;
+                    } else {
+                        R[k][target] = penalty;
+
+
+                    }
+                }
+
+                int moveRight = h+1;
+                if(moveRight<=m.getWidth()){
+                    int target = i * m.getWidth()+moveRight;
+                    if (maze[i][moveRight]=='E') {
+                        R[k][target] = reward;
+                    } else if (maze[i][moveRight]=='F') {
+                        R[k][target]=penalty;
+                    }else{
+                        R[k][target]=penalty;
+                    }
+                }
+
+                int moveUp = h-1;
+                if(moveUp>=0){
+                    int target = i * m.getWidth()+moveUp;
+                    if (maze[i][moveUp]=='E') {
+                        R[k][target] = 0;
+                    } else if (maze[i][moveUp]=='F') {
+                        R[k][target]= reward;
+                    }else{
+                        R[k][target]=penalty;
+                    }
+                }
+
+                int moveDown = h+1;
+                if(moveDown< m.getHeight()){
+                    int target = i * m.getWidth()+moveDown;
+                    if (maze[i][moveDown]=='E') {
+                        R[k][target] = 0;
+                    } else if (maze[i][moveRight]=='F') {
+                        R[k][target]=reward;
+                    }else{
+                        R[k][target]=penalty;
+                    }
+                }
+
+
+
+                }
+            }
+        initializeQ();
+        }
+
+    }
+
