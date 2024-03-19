@@ -16,9 +16,13 @@ public class MazeSolver {
     private double[][] Q;
 
     private Maze m = new Maze();
-    private char[][] maze = m.outputMaze();
+    private char[][] maze;
 
     public MazeSolver() {
+        R = new int[m.getStatesCount()][m.getStatesCount()];
+        Q = new double[m.getStatesCount()][m.getStatesCount()];
+        m.generate();
+        maze=m.outputMaze();
 
     }
 

@@ -6,7 +6,7 @@ public class Maze {
     private char[][] maze;
     private int width;
     private int height;
-    private int statesCount = height * width;
+    private int statesCount = 3 *3;
 
     private Random r;
 
