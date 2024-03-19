@@ -6,7 +6,7 @@ public class Maze {
     private char[][] maze;
     private int width;
     private int height;
-    private int statesCount = height * width;
+    private int statesCount;
 
     private Random r;
 
@@ -16,8 +16,9 @@ public class Maze {
 
     public Maze() {
         r = new Random();
-        width = r.nextInt(9) + 2;
-        height = r.nextInt(9) + 2;
+        width = 3;
+        height = 3;
+        statesCount = 3 * 3;
     }
 
     public void generate() {
@@ -60,3 +61,4 @@ public class Maze {
         return statesCount;
     }
 }
+
