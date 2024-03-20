@@ -1,25 +1,29 @@
-
+/*
+Hk
+3/20/24
+Cz
+ */
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class MazeSolver {
-
+    // Learning rate and discount factor for Q-learning
     private final double alpha = 0.1;
     private final double gamma = 0.9;
-
+    // Dimensions of the maze
     private final int mazeWidth = 3;
     private final int mazeHeight = 3;
     private final int statesCount = mazeHeight * mazeWidth;
-
+    // Rewards and penalties
     private final int reward = 100;
     private final int penalty = -10;
-
+    // Maze structure and Q/R matrices
     private char[][] maze;
     private int[][] R;
     private double[][] Q;
 
-
+    // Main method to run the solver
     public static void main(String args[]) throws IOException {
         MazeSolver mz = new MazeSolver();
 
@@ -32,7 +36,7 @@ public class MazeSolver {
         mz.printQ();
         mz.printPolicy();
     }
-
+    // Initializes the maze, R, and Q matrices
     public void init() {
         File file = new File("maze.txt");
 
@@ -62,7 +66,7 @@ public class MazeSolver {
                 }
             }
 
-
+// Initialize the R matrix based on the maze structure
             for (int k = 0; k < statesCount; k++) {
 
 
@@ -72,7 +76,7 @@ public class MazeSolver {
                 for (int s = 0; s < statesCount; s++) {
                     R[k][s] = -1;
                 }
-
+// Assign rewards/penalties for moving in each direction
                 if (maze[i][j] != 'F') {
 
                     int goLeft = j - 1;
@@ -129,6 +133,7 @@ public class MazeSolver {
             e.printStackTrace();
         }
     }
+    // Initialize Q matrix with values from R matrix
     void initializeQ()
     {
         for (int i = 0; i < statesCount; i++){
@@ -137,6 +142,7 @@ public class MazeSolver {
             }
         }
     }
+    // Print the R matrix
     void printR(int[][] matrix) {
         System.out.printf("%25s", "States: ");
         for (int i = 0; i <= 8; i++) {
@@ -152,7 +158,7 @@ public class MazeSolver {
             System.out.println("]");
         }
     }
-
+    // Calculate the Q matrix using the Q-learning algorithm
     void calculateQ() {
         Random rand = new Random();
 
@@ -178,7 +184,7 @@ public class MazeSolver {
             }
         }
     }
-
+    // Check if a state is a final state
     boolean isFinalState(int state) {
         int i = state / mazeWidth;
         int j = state - i * mazeWidth;
@@ -209,14 +215,14 @@ public class MazeSolver {
         }
         return maxValue;
     }
-
+    // Print the optimal policy based on the Q matrix
     void printPolicy() {
         System.out.println("\nPrint policy");
         for (int i = 0; i < statesCount; i++) {
             System.out.println("From state " + i + " goto state " + getPolicyFromState(i));
         }
     }
-
+    // Get the policy (optimal next state) from a given state
     int getPolicyFromState(int state) {
         int[] actionsFromState = possibleActionsFromState(state);
 
@@ -234,7 +240,7 @@ public class MazeSolver {
         }
         return policyGotoState;
     }
-
+    // Print the Q matrix to a file
     void printQ() throws FileNotFoundException {
 
         PrintWriter pw = new PrintWriter("Q-matrix.txt");
