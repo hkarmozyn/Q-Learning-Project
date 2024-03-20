@@ -1,4 +1,14 @@
 # Q-Learning-Project
+MazeSolver
+MazeSolver is a Java application designed to solve mazes using Q-learning, a model-free reinforcement learning algorithm. The program reads a maze configuration from a file, applies Q-learning to find the optimal path, and outputs the solution.
+
+Features
+Reads maze configurations from a text file.
+Utilizes Q-learning algorithm to find the optimal path through the maze.
+Outputs the Q-value matrix and the optimal policy for navigating the maze.
+Customizable learning rate and discount factor for experimentation with different learning scenarios.
+
+
 What is Q Learning? What does the Q stand for (and what about the "Learning")?
 Q learning is a model-free, value-based, off-policy algorithm that will find the best series of actions based on the agent's current state. The Q in Q learning stands for quality.
 What is RL (Reinforcement Learning) and how does it relate to ML (Machine Learning)?
