@@ -1,6 +1,5 @@
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -9,143 +8,161 @@ public class MazeSolver {
     private final double alpha = 0.1;
     private final double gamma = 0.9;
 
+    private final int mazeWidth = 3;
+    private final int mazeHeight = 3;
+    private final int statesCount = mazeHeight * mazeWidth;
+
     private final int reward = 100;
     private final int penalty = -10;
 
+    private char[][] maze;
     private int[][] R;
     private double[][] Q;
 
-    private Maze m = new Maze();
-    private char[][] maze;
 
-    public MazeSolver() {
-        R = new int[m.getStatesCount()][m.getStatesCount()];
-        Q = new double[m.getStatesCount()][m.getStatesCount()];
+    public static void main(String args[]) throws IOException {
+        MazeSolver mz = new MazeSolver();
+
+        Maze m = new Maze();
         m.generate();
-        maze = m.outputMaze();
+        m.outputMaze();
+
+        mz.init();
+        mz.calculateQ();
+        mz.printQ();
+        mz.printPolicy();
     }
 
-    public void run() {
-        int i;
-        int j;
+    public void init() {
+        File file = new File("maze.txt");
 
-        for (int k = 0; k < m.getStatesCount(); k++) {
+        R = new int[statesCount][statesCount];
+        Q = new double[statesCount][statesCount];
+        maze = new char[mazeHeight][mazeWidth];
 
-            i = k / m.getWidth();
-            j = k - i * m.getWidth();
 
-            for (int s = 0; s < m.getStatesCount(); s++) {
-                R[k][s] = -1;
-            }
+        try (FileInputStream fis = new FileInputStream(file)) {
 
-            if (maze[i][j] != 'F') {
-                int moveLeft = j - 1;
-                if (moveLeft >= 0) {
-                    int target = i * m.getWidth() + moveLeft;
-                    if (maze[i][moveLeft] == 'E') {
-                        R[k][target] = 0;
-                    } else if (maze[i][moveLeft] == 'F') {
-                        R[k][target] = reward;
-                    } else {
-                        R[k][target] = penalty;
-                    }
+            int i = 0;
+            int j = 0;
+
+            int content;
+
+
+            while ((content = fis.read()) != -1) {
+                char c = (char) content;
+                if (c != '0' && c != 'F' && c != 'X') {
+                    continue;
                 }
-
-                int moveRight = j + 1;
-                if (moveRight < m.getWidth()) {
-                    int target = i * m.getWidth() + moveRight;
-                    if (maze[i][moveRight] == 'E') {
-                        R[k][target] = 0;
-                    } else if (maze[i][moveRight] == 'F') {
-                        R[k][target] = reward;
-                    } else {
-                        R[k][target] = penalty;
-                    }
-                }
-
-                int moveUp = i - 1;
-                if (moveUp >= 0) {
-                    int target = moveUp * m.getWidth() + j;
-                    if (maze[i][moveUp] == 'E') {
-                        R[k][target] = 0;
-                    } else if (maze[i][moveUp] == 'F') {
-                        R[k][target] = reward;
-                    } else {
-                        R[k][target] = penalty;
-                    }
-                }
-
-                int moveDown = i + 1;
-                if (moveDown < m.getHeight()) {
-                    int target = moveDown * m.getWidth() + j;
-                    if (maze[i][moveDown] == 'E') {
-                        R[k][target] = 0;
-                    } else if (maze[i][moveDown] == 'F') {
-                        R[k][target] = reward;
-                    } else {
-                        R[k][target] = penalty;
-                    }
+                maze[i][j] = c;
+                j++;
+                if (j == mazeWidth) {
+                    j = 0;
+                    i++;
                 }
             }
-        }
-    }
 
-    boolean isFinalState(int state) {
-        int i = state / m.getWidth();
-        int j = state - i * m.getWidth();
 
-        return maze[i][j] == 'F';
-    }
+            for (int k = 0; k < statesCount; k++) {
 
-    int[] possibleActionsFromState(int state) {
-        ArrayList<Integer> result = new ArrayList<>();
-        for (int i = 0; i < m.getStatesCount(); i++) {
-            if (R[state][i] != -1) {
-                result.add(i);
+
+                i = k / mazeWidth;
+                j = k - i * mazeWidth;
+
+                for (int s = 0; s < statesCount; s++) {
+                    R[k][s] = -1;
+                }
+
+                if (maze[i][j] != 'F') {
+
+                    int goLeft = j - 1;
+                    if (goLeft >= 0) {
+                        int target = i * mazeWidth + goLeft;
+                        if (maze[i][goLeft] == '0') {
+                            R[k][target] = 0;
+                        } else if (maze[i][goLeft] == 'F') {
+                            R[k][target] = reward;
+                        } else {
+                            R[k][target] = penalty;
+                        }
+                    }
+                    int goRight = j + 1;
+                    if (goRight < mazeWidth) {
+                        int target = i * mazeWidth + goRight;
+                        if (maze[i][goRight] == '0') {
+                            R[k][target] = 0;
+                        } else if (maze[i][goRight] == 'F') {
+                            R[k][target] = reward;
+                        } else {
+                            R[k][target] = penalty;
+                        }
+                    }
+
+                    int goUp = i - 1;
+                    if (goUp >= 0) {
+                        int target = goUp * mazeWidth + j;
+                        if (maze[goUp][j] == '0') {
+                            R[k][target] = 0;
+                        } else if (maze[goUp][j] == 'F') {
+                            R[k][target] = reward;
+                        } else {
+                            R[k][target] = penalty;
+                        }
+                    }
+
+                    int goDown = i + 1;
+                    if (goDown < mazeHeight) {
+                        int target = goDown * mazeWidth + j;
+                        if (maze[goDown][j] == '0') {
+                            R[k][target] = 0;
+                        } else if (maze[goDown][j] == 'F') {
+                            R[k][target] = reward;
+                        } else {
+                            R[k][target] = penalty;
+                        }
+                    }
+                }
             }
+            initializeQ();
+            printR(R);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        int[] actionsArray = new int[result.size()];
-        for (int i = 0; i < result.size(); i++) {
-            actionsArray[i] = result.get(i);
-        }
-
-        return actionsArray;
     }
-
-    public double maxQ(int nextState) {
-        int[] actionsFromState = possibleActionsFromState(nextState);
-
-        double maxValue = -10;
-        for (int i = 0; i < actionsFromState.length; i++) {
-            int nextAction = actionsFromState[i];
-            double value = Q[nextState][nextAction];
-
-            if (value > maxValue)
-                maxValue = value;
-        }
-        return maxValue;
-    }
-
-    void initializeQ() {
-        for (int i = 0; i < m.getStatesCount(); i++){
-            for(int j = 0; j < m.getStatesCount(); j++){
+    void initializeQ()
+    {
+        for (int i = 0; i < statesCount; i++){
+            for(int j = 0; j < statesCount; j++){
                 Q[i][j] = (double)R[i][j];
             }
+        }
+    }
+    void printR(int[][] matrix) {
+        System.out.printf("%25s", "States: ");
+        for (int i = 0; i <= 8; i++) {
+            System.out.printf("%4s", i);
+        }
+        System.out.println();
+
+        for (int i = 0; i < statesCount; i++) {
+            System.out.print("Possible states from " + i + " :[");
+            for (int j = 0; j < statesCount; j++) {
+                System.out.printf("%4s", matrix[i][j]);
+            }
+            System.out.println("]");
         }
     }
 
     void calculateQ() {
         Random rand = new Random();
 
-        for (int i = 0; i < 1000; i++) { // Train cycles
-            // Select random initial state
-            int crtState = rand.nextInt(m.getStatesCount());
+        for (int i = 0; i < 1000; i++) {
+            int crtState = rand.nextInt(statesCount);
 
             while (!isFinalState(crtState)) {
                 int[] actionsFromCurrentState = possibleActionsFromState(crtState);
 
-                // Pick a random action from the ones possible
+
                 int index = rand.nextInt(actionsFromCurrentState.length);
                 int nextState = actionsFromCurrentState[index];
 
@@ -162,40 +179,40 @@ public class MazeSolver {
         }
     }
 
-    public void printQ() {
-        try (PrintWriter pw = new PrintWriter(new FileWriter("output.txt"))) {
-            pw.println("Q matrix");
-            for (int i = 0; i < Q.length; i++) {
-                pw.print("From state " + i + ":  ");
-                for (int j = 0; j < Q[i].length; j++) {
-                    pw.println("%6.2f " + Q[i][j]);
-                }
-                pw.println();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    boolean isFinalState(int state) {
+        int i = state / mazeWidth;
+        int j = state - i * mazeWidth;
+
+        return maze[i][j] == 'F';
     }
 
-    public void printR(int[][] matrix) {
-        System.out.print("%25s " + "States: ");
-        for (int i = 0; i <= 8; i++) {
-            System.out.print("%4s " + i);
-        }
-        System.out.println();
-
-        for (int i = 0; i < m.getStatesCount(); i++) {
-            System.out.print("Possible states from " + i + " :[");
-            for (int j = 0; j < m.getStatesCount(); j++) {
-                System.out.print("%4s " + matrix[i][j]);
+    int[] possibleActionsFromState(int state) {
+        ArrayList<Integer> result = new ArrayList<>();
+        for (int i = 0; i < statesCount; i++) {
+            if (R[state][i] != -1) {
+                result.add(i);
             }
-            System.out.println("]");
         }
+
+        return result.stream().mapToInt(i -> i).toArray();
+    }
+
+    double maxQ(int nextState) {
+        int[] actionsFromState = possibleActionsFromState(nextState);
+
+        double maxValue = -10;
+        for (int nextAction : actionsFromState) {
+            double value = Q[nextState][nextAction];
+
+            if (value > maxValue)
+                maxValue = value;
+        }
+        return maxValue;
     }
 
     void printPolicy() {
         System.out.println("\nPrint policy");
-        for (int i = 0; i < m.getStatesCount(); i++) {
+        for (int i = 0; i < statesCount; i++) {
             System.out.println("From state " + i + " goto state " + getPolicyFromState(i));
         }
     }
@@ -206,7 +223,7 @@ public class MazeSolver {
         double maxValue = Double.MIN_VALUE;
         int policyGotoState = state;
 
-        // Pick to move to the state that has the maximum Q value
+
         for (int nextState : actionsFromState) {
             double value = Q[state][nextState];
 
@@ -217,5 +234,19 @@ public class MazeSolver {
         }
         return policyGotoState;
     }
-}
 
+    void printQ() throws FileNotFoundException {
+
+        PrintWriter pw = new PrintWriter("Q-matrix.txt");
+
+        pw.println("Q matrix");
+        for (int i = 0; i < Q.length; i++) {
+            pw.print("From state " + i + ":  ");
+            for (int j = 0; j < Q[i].length; j++) {
+                pw.printf("%6.2f ", (Q[i][j]));
+            }
+            pw.println();
+        }
+        pw.close();
+    }
+}
